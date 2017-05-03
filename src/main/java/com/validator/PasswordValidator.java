@@ -18,7 +18,7 @@ public class PasswordValidator extends BaseValidator<String[]> {
             return false;
         }
 
-        if (values.length > 1) {
+        if (values.length > 1 && values[1] != null) {
             if (!values[1].equals(values[0])) {
                 errorMessage = DEFAULT_ERROR_MESSAGE2;
                 return false;

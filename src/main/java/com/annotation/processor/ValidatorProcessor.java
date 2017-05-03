@@ -1,10 +1,13 @@
 package com.annotation.processor;
 
-import com.validator.ValidatorType;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -29,165 +32,51 @@ public class ValidatorProcessor extends AbstractProcessor {
         }
 
         for (String className : classList) {
-            StringBuilder builder = new StringBuilder();
             String parentClassName = className.substring(className.lastIndexOf('.') + 1, className.length());
             String packageName = className.substring(0, className.lastIndexOf('.'));
 
-            builder.append("package " + packageName + ";\n" +
-                    "\n" +
-                    "import android.support.design.widget.TextInputLayout;\n" +
-                    "import com.validator.*;\n" +
-                    "import com.validator.bind.IBindValidator;\n" +
-                    "import java.util.ArrayList;\n" +
-                    "import java.util.Map;\n"
-            );
+            VelocityContext context = new VelocityContext();
+            context.put("packageName", packageName);
+            context.put("parentClassName", parentClassName);
 
-            builder.append("public final class " + parentClassName + "_BindValidator<T extends " + parentClassName + "> implements IBindValidator{\n\n" +
-                    "private T view;\n" +
-                    "private ArrayList<FieldExtension> fields = new ArrayList<>();\n" +
-                    "public " + parentClassName + "_BindValidator(Object target) {\n" +
-                    "view = (T) target;\n");
+            ArrayList<HashMap> fields = new ArrayList<>();
 
             for (Element element : roundEnv.getElementsAnnotatedWith(BindViewValidator.class)) {
                 BindViewValidator antn = element.getAnnotation(BindViewValidator.class);
                 String targetClassName = element.getEnclosingElement().asType().toString();
+
                 if (!className.equals(targetClassName)) continue;
 
-                String textView = element.getSimpleName().toString();
-
-                String fieldType = null;
-                if (antn.type().equals(ValidatorType.PASSWORD))
-                    fieldType = "String[]";
-                else if (antn.type().equals(ValidatorType.CHECK))
-                    fieldType = "Boolean";
-                else
-                    fieldType = "String";
-                if (antn.type().equals(ValidatorType.CUSTOM))
-                    builder.append("fields.add(new FieldExtension<String>(new " + antn.type()
-                            + "(view." + textView + ".getId(), \"" + antn.pattern().replace("\\", "\\\\") + "\")" + (antn.field().isEmpty() ? "" : ", \"" + antn.field() + "\"")
-                            + ") {\n" + "   @Override\n");
-                else
-                    builder.append("fields.add(new FieldExtension<" + fieldType + ">(new " + antn.type()
-                            + "(view." + textView + ".getId())" + (antn.field().isEmpty() ? "" : ", \"" + antn.field() + "\"")
-                            + ") {\n" + "   @Override\n");
-                if (antn.type().equals(ValidatorType.PASSWORD))
-                    builder.append("   public " + fieldType + " getValue() {\n" +
-                            "       return new String[] { view." + textView + ".getText().toString()" +
-                            (antn.related().isEmpty() ? "" : ", view." + antn.related() + ".getText().toString()") + "};\n");
-                else if (antn.type().equals(ValidatorType.CHECK))
-                    builder.append("   public " + fieldType + " getValue() {\n" +
-                            "       return view." + textView + ".isChecked();\n");
-                else
-                    builder.append("   public " + fieldType + " getValue() {\n" +
-                            "       return view." + textView + ".getText().toString();\n");
-                builder.append("   }\n" +
-
-                        "   @Override\n" +
-                        "   public void setError(String message) {\n");
-                if (antn.hasLayout())
-                    builder.append("       ((TextInputLayout) view." + textView + ".getParent().getParent()).setError(message);\n}\n");
-                else
-                    builder.append("       view." + textView + ".setError(message);\n}\n");
-
-                if (antn.hasLayout())
-                    builder.append("@Override\n" +
-                            "public boolean isActive() {\n" +
-                            "   return  ((TextInputLayout) view." + textView + ".getParent().getParent()).getVisibility() == 0 && active;\n" +
-                            "}");
-                else
-                    builder.append("@Override\n" +
-                            "public boolean isActive() {\n" +
-                            "   return  view." + textView + ".getVisibility() == 0 && active;\n" +
-                            "}");
-                builder.append("});\n\n");
-
+                HashMap<String, Object> params = new HashMap<>();
+                params.put("name", element.getSimpleName().toString());
+                params.put("type", antn.type());
+                params.put("hasLayout", antn.hasLayout());
+                params.put("field", antn.field());
+                params.put("related", antn.related());
+                fields.add(params);
             }
-            builder.append("\n}\n\n");
 
-            builder.append("public ValidatorGroup getValidator() {\n" +
-                    "        ValidatorGroup validator = new ValidatorGroup();\n" +
-                    "        for (FieldExtension field : fields) {\n" +
-                    "            field.setError(null);\n" +
-                    "            if (!field.isActive()) continue;\n" +
-                    "            validator.add(field.getValidator());\n" +
-                    "        }\n" +
-                    "        \n" +
-                    "        return validator;\n" +
-                    "    }\n");
+            context.put("fields", fields);
 
-            builder.append("public void setErrors(Map<String, String> errors) {\n" +
-                    "        for (Map.Entry<String, String> entry : errors.entrySet()) {\n" +
-                    "            for (FieldExtension field : fields) {\n" +
-                    "                if (field.equals(entry.getKey())) {\n" +
-                    "                    field.setError(entry.getValue());\n" +
-                    "                    break;\n" +
-                    "                }\n" +
-                    "            }\n" +
-                    "        }\n" +
-                    "}");
-
-            builder.append("public void enableAll() {\n" +
-                    "        for (FieldExtension field : fields) {\n" +
-                    "            field.active = true;\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "\n" +
-                    "    public void disable(int[] ids) {\n" +
-                    "        for (int id : ids) {\n" +
-                    "            for (FieldExtension field : fields) {\n" +
-                    "                if (field.equals(String.valueOf(id))) {\n" +
-                    "                    field.active = false;\n" +
-                    "                    break;\n" +
-                    "                }\n" +
-                    "            }\n" +
-                    "        }\n" +
-                    "    }");
-
-            builder.append("\n\nclass FieldExtension<T> {\n" +
-                    "        private final String field;\n" +
-                    "        protected boolean active = true;\n" +
-                    "        private final IValidator validator;\n" +
-                    "\n" +
-                    "        public FieldExtension(IValidator validator) {\n" +
-                    "            this(validator, null);\n" +
-                    "        }\n" +
-                    "\n" +
-                    "        public FieldExtension(IValidator validator, String field) {\n" +
-                    "            this.field = field;\n" +
-                    "            this.validator = validator;\n" +
-                    "        }\n" +
-                    "\n" +
-                    "        @Override\n" +
-                    "        public boolean equals(Object obj) {\n" +
-                    "            return String.valueOf(validator.getId()).equals(obj) \n" +
-                    "                    || field != null && field.equals(obj);\n" +
-                    "        }\n" +
-                    "\n" +
-                    "        public T getValue() {\n" +
-                    "            return null;\n" +
-                    "        }\n" +
-                    "\n" +
-                    "        public void setError(String message) {\n" +
-                    "        }\n" +
-                    "\n" +
-                    "        public IValidator getValidator() {\n" +
-                    "            validator.setValue(getValue());\n" +
-                    "            return validator;\n" +
-                    "        }\n" +
-                    "        public boolean isActive() {\n" +
-                    "            return active;\n" +
-                    "        }" +
-                    "" +
-                    "}");
-            builder.append("}");
             try {
-                JavaFileObject source = processingEnv.getFiler().createSourceFile(className + "_BindValidator");
+                Properties props = new Properties();
+                props.put("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SystemLogChute");
+                props.put("resource.loader", "classpath");
+                props.put("classpath.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 
+                VelocityEngine ve = new VelocityEngine(props);
+                ve.init();
+
+                Template vt = ve.getTemplate("Binder.tpl");
+
+                JavaFileObject source = processingEnv.getFiler().createSourceFile(className + "_BindValidator");
                 Writer writer = source.openWriter();
-                writer.write(builder.toString());
-                writer.flush();
+
+                vt.merge(context, writer);
                 writer.close();
-            } catch (IOException e) {
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

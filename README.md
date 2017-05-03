@@ -52,7 +52,7 @@ private IBindValidator bindValidator;
 ``` Java
 @BindViewValidator(type = ValidatorType.EMAIL, field = "email")
 @BindView(R.id.text_email)
-CustomView fieldView;
+EditText fieldView;
 ...
 @BindViewValidator(type = ValidatorType.PASSWORD, related = "password2View")
 @BindView(R.id.text_password)
@@ -66,8 +66,9 @@ EditText password2View;
 @BindView(R.id.text_phone)
 EditText phoneView;
 ```
-## How to output a custom error message
-
+## How to add a custom view into Validator
+1) You need implement IFieldExtension in your custom view 
+2) Add your custom view manualy **bindValidator.add(<your_custom_view>);**
 
 ## How to add in project 
 ```
