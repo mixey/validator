@@ -1,18 +1,16 @@
 apply plugin: 'java'
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'org.apache.velocity:velocity:1.7'
+repositories {
+    maven {
+        url "https://mvnrepository.com/artifact/org.apache.velocity/velocity"
+    }
 }
 
 dependencies {
-    compile(name: 'velocity-1.7', ext: 'jar')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile group: 'org.apache.velocity', name: 'velocity', version: '1.7'
 }
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}
+
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
