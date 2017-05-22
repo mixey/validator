@@ -16,19 +16,9 @@ public abstract class BaseValidator<T> implements IValidator<T> {
         return id;
     }
 
-    protected String convertToUTF(String win1251Value) {
-        try {
-            return new String(win1251Value.getBytes("windows-1251"), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     @Override
     public String getErrorMessage() {
-        return convertToUTF(errorMessage);
+        return errorMessage;
     }
 
     @Override

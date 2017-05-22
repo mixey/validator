@@ -9,5 +9,7 @@ dependencies {
     compile 'org.apache.velocity:velocity:1.7'
 }
 
+compileJava.options.encoding = 'UTF-8'
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"

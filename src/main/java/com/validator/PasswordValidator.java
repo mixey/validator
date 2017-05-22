@@ -29,6 +29,6 @@ public class PasswordValidator extends BaseValidator<String[]> {
     }
 
     public String getErrorMessage() {
-        return convertToUTF(errorMessage);
+        return errorMessage;
     }
 }
