@@ -1,6 +1,7 @@
 package ${packageName};
 
 import android.support.design.widget.TextInputLayout;
+import android.view.View;
 
 import com.validator.*;
 import com.validator.bind.IBindValidator;
@@ -46,13 +47,11 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
             }
             @Override
             public void setError(String message) {
-                #if ($field.hasLayout)
-
-                ((TextInputLayout) view.${field.name}.getParent().getParent()).setError(message);
-                #else
-
-                view.${field.name}.setError(message);
-                #end
+                TextInputLayout layout = searchLayout(view.${field.name}, 3);
+                if (layout == null)
+                    view.${field.name}.setError(message);
+                else
+                    layout.setError(message);
 
             }
             @Override
@@ -82,6 +81,17 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
         });
         #end
 
+    }
+
+    private TextInputLayout searchLayout(View view, int depth) {
+        if (view instanceof TextInputLayout)
+            return (TextInputLayout) view;
+        else if (depth > 0){
+            depth--;
+            return searchLayout((View) view.getParent(), depth);
+        }
+
+        return null;
     }
 
     public void add(IFieldExtension field) {

@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NameValidator extends BaseValidator<String> {
-    private final String PATTERN = "^[a-zA-Z]+$";
+    private final String PATTERN = "^[a-zA-ZА-Яа-я]+$";
     private final String DEFAULT_ERROR_MESSAGE = "Пустое или неверное значение";
 
     public NameValidator(int id) {
