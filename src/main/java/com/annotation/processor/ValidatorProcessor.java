@@ -50,9 +50,15 @@ public class ValidatorProcessor extends AbstractProcessor {
                 HashMap<String, Object> params = new HashMap<>();
                 params.put("name", element.getSimpleName().toString());
                 params.put("type", antn.type());
-                params.put("hasLayout", antn.hasLayout());
-                params.put("field", antn.field());
-                params.put("related", antn.related());
+                if (!antn.related().isEmpty())
+                    params.put("related", antn.related());
+                if (!antn.errorMessage().isEmpty())
+                    params.put("errorMessage", antn.errorMessage());
+                if (!antn.field().isEmpty())
+                    params.put("field", antn.field());
+                if (!antn.pattern().isEmpty())
+                    params.put("pattern", antn.pattern().replace("\\", "\\\\"));
+
                 fields.add(params);
             }
 

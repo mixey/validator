@@ -1,6 +1,6 @@
 package com.validator.bind;
 
-import com.validator.IFieldExtension;
+import com.validator.IFieldWrapper;
 import com.validator.ValidatorGroup;
 
 import java.util.Map;
@@ -8,11 +8,13 @@ import java.util.Map;
 public interface IBindValidator {
     ValidatorGroup getValidator();
 
-    void add(IFieldExtension field);
+    void add(IFieldWrapper wrapper);
 
     void enableAll();
 
-    void disable(int[] ids);
+    void disable(int[] fieldIds);
 
     void setErrors(Map<String, String> errors);
+
+    IFieldWrapper getFieldWrapper(int fieldId);
 }

@@ -12,26 +12,28 @@ import java.util.Map;
 public final class ${parentClassName}_BindValidator<T extends ${parentClassName}> implements IBindValidator {
 
     private T view;
-    private ArrayList<IFieldExtension> fields = new ArrayList<>();
+    private ArrayList<IFieldWrapper> fields = new ArrayList<>();
     private ArrayList<Integer> inactiveFieldIds = new ArrayList<>();
 
     public ${parentClassName}_BindValidator(Object target) {
         view = (T) target;
         #foreach($field in $fields)
 
-        fields.add(new IFieldExtension() {
-            IValidator validator = new ${field.type}(view.${field.name}.getId());
+        fields.add(new FieldWrapper(new ${field.type}(view.${field.name}.getId()#if($field.pattern),"$field.pattern"#end)#if($field.errorMessage){
+            @Override
+            public String getErrorMessage() {
+                return "$field.errorMessage";
+            }
+            }#end) {
+            private final TextInputLayout layout = searchLayout(view.${field.name}, 3);
 
             @Override
             public Object getValue() {
+                if (plugin != null)
+                    return plugin.getValue();
                 #if (${field.type.equals("PasswordValidator")})
 
-                String value2 = null;
-                #if (!${field.related.isEmpty()})
-                value2 = view.${field.related}.getText().toString();
-                #end
-
-                return new String[] {view.${field.name}.getText().toString(), value2};
+                return new String[]{view.${field.name}.getText().toString()#if (${field.related}),view.${field.related}.getText().toString()#end};
                 #elseif (${field.type.equals("CheckValidator")})
 
                 return view.${field.name}.isChecked();
@@ -41,43 +43,33 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
                 #end
 
             }
-            @Override
-            public IValidator getValidator() {
-                return validator;
-            }
+
             @Override
             public void setError(String message) {
-                TextInputLayout layout = searchLayout(view.${field.name}, 3);
+                if (plugin != null && plugin.setError(message))
+                    return;
+
                 if (layout == null)
                     view.${field.name}.setError(message);
                 else
                     layout.setError(message);
-
             }
+
             @Override
             public boolean isActiveValidator() {
-                #if ($field.hasLayout)
-
-                return ((TextInputLayout) view.${field.name}.getParent().getParent()).getVisibility() == 0
-                    && !inactiveFieldIds.contains(getValidator().getId());
-                #else
-
-                return view.${field.name}.getVisibility() == 0
-                    && !inactiveFieldIds.contains(getValidator().getId());
-                #end
+                return (layout != null && layout.getVisibility() == 0)
+                        && view.${field.name}.getVisibility() == 0
+                        && !inactiveFieldIds.contains(getValidator().getId());
 
             }
+
+            #if ($field.field)
             @Override
             public String getField() {
-                #if ($field.field.isEmpty())
-
-                return null;
-                #else
-
                 return "${field.field}";
-                #end
 
-            }
+            }#end
+
         });
         #end
 
@@ -86,7 +78,7 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
     private TextInputLayout searchLayout(View view, int depth) {
         if (view instanceof TextInputLayout)
             return (TextInputLayout) view;
-        else if (depth > 0){
+        else if (depth > 0) {
             depth--;
             return searchLayout((View) view.getParent(), depth);
         }
@@ -94,13 +86,23 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
         return null;
     }
 
-    public void add(IFieldExtension field) {
+    public void add(IFieldWrapper field) {
         fields.add(field);
+    }
+
+    @Override
+    public IFieldWrapper getFieldWrapper(int fieldId) {
+        for (IFieldWrapper wrapper : fields) {
+            if (wrapper.getValidator().getId() == fieldId)
+                return wrapper;
+        }
+
+        return null;
     }
 
     public ValidatorGroup getValidator() {
         ValidatorGroup validator = new ValidatorGroup();
-        for (IFieldExtension field : fields) {
+        for (IFieldWrapper field : fields) {
             field.setError(null);
             if (!field.isActiveValidator()) continue;
             IValidator v = field.getValidator();
@@ -113,9 +115,9 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
 
     public void setErrors(Map<String, String> errors) {
         for (Map.Entry<String, String> entry : errors.entrySet()) {
-            for (IFieldExtension field : fields) {
+            for (IFieldWrapper field : fields) {
                 if (String.valueOf(field.getValidator().getId()).equals(entry.getKey())
-                || field.getField() != null && field.getField().equals(entry.getKey())) {
+                    || field.getField() != null && field.getField().equals(entry.getKey())) {
                     field.setError(entry.getValue());
                     break;
                 }

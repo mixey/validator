@@ -4,8 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NameValidator extends BaseValidator<String> {
-    private final String PATTERN = "^[a-zA-ZА-Яа-я]+$";
-    private final String DEFAULT_ERROR_MESSAGE = "Пустое или неверное значение";
+    private final String PATTERN = "^[a-zA-ZА-Яа-я]{3,20}$";
+    private final String DEFAULT_ERROR_MESSAGE = "Неверный формат";
 
     public NameValidator(int id) {
         super(id);

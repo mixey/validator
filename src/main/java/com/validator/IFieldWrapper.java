@@ -1,10 +1,6 @@
 package com.validator;
 
-@Deprecated
-/**
- * @deprecated use {@link IFieldWrapper} instead
- * */
-public interface IFieldExtension {
+public interface IFieldWrapper {
     Object getValue();
 
     IValidator getValidator();
@@ -14,4 +10,6 @@ public interface IFieldExtension {
     boolean isActiveValidator();
 
     String getField();
+
+    void addPlugin(IFieldPlugin plugin);
 }
