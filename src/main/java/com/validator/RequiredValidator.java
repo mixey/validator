@@ -11,7 +11,7 @@ public class RequiredValidator extends BaseValidator<String> {
 
     @Override
     public boolean validate() {
-        if (getValue() == null || getValue().isEmpty()) {
+        if (getValue() == null || getValue().trim().isEmpty()) {
             return false;
         }
 
