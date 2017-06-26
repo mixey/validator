@@ -20,9 +20,12 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
         #foreach($field in $fields)
 
         fields.add(new FieldWrapper(new ${field.type}(view.${field.name}.getId()#if($field.pattern),"$field.pattern"#end)#if($field.errorMessage){
-            @Override
-            public String getErrorMessage() {
-                return "$field.errorMessage";
+            {
+                    #if (${field.type.equals("PasswordValidator")})
+                    defaultErrorMessage = "$field.errorMessage";
+                    #else
+                    errorMessage = "$field.errorMessage";
+                    #end
             }
             }#end) {
             private final TextInputLayout layout = searchLayout(view.${field.name}, 3);

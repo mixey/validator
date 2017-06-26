@@ -1,7 +1,5 @@
 package com.validator;
 
-import java.io.UnsupportedEncodingException;
-
 public abstract class BaseValidator<T> implements IValidator<T> {
     protected final int id;
     protected T value;

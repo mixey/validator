@@ -1,34 +1,41 @@
 package com.validator;
 
-public class PasswordValidator extends BaseValidator<String[]> {
-    private final int PASSWORD_LENGTH = 5;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-    private final String DEFAULT_ERROR_MESSAGE = "Пароль должен быть больше %d символов";
+public class PasswordValidator extends BaseValidator<String[]> {
+
+    protected String defaultErrorMessage = "Некорректный пароль";
+
+    private String regex = "[0-9a-zA-Z@#$%^&+=]{6,}";
     private final String DEFAULT_ERROR_MESSAGE2 = "Пароли не совпадают";
 
     public PasswordValidator(int id) {
         super(id);
     }
 
+    public PasswordValidator(int id, String pattern) {
+        this(id);
+        this.regex = pattern;
+    }
+
     @Override
     public boolean validate() {
         String[] values = getValue();
-        if (values[0].length() <= PASSWORD_LENGTH) {
-            errorMessage = String.format(DEFAULT_ERROR_MESSAGE, PASSWORD_LENGTH);
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(values[0]);
+        if (!matcher.matches()) {
+            setErrorMessage(defaultErrorMessage);
             return false;
         }
 
         if (values.length > 1 && values[1] != null) {
             if (!values[1].equals(values[0])) {
-                errorMessage = DEFAULT_ERROR_MESSAGE2;
+                setErrorMessage(DEFAULT_ERROR_MESSAGE2);
                 return false;
             }
         }
 
         return true;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
     }
 }
