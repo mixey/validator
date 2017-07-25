@@ -103,6 +103,17 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
         return null;
     }
 
+    @Override
+    public IFieldWrapper getFieldWrapper(String field) {
+        for (IFieldWrapper wrapper : fields) {
+            if (wrapper.getField() != null && wrapper.getField().equals(field))
+                return wrapper;
+        }
+
+        return null;
+    }
+
+
     public ValidatorGroup getValidator() {
         ValidatorGroup validator = new ValidatorGroup();
         for (IFieldWrapper field : fields) {

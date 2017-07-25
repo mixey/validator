@@ -17,4 +17,6 @@ public interface IBindValidator {
     void setErrors(Map<String, String> errors);
 
     IFieldWrapper getFieldWrapper(int fieldId);
+
+    IFieldWrapper getFieldWrapper(String field);
 }
