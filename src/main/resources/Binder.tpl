@@ -104,13 +104,13 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
     }
 
     @Override
-    public IFieldWrapper getFieldWrapper(String field) {
+    public int getWidgetId(String field) {
         for (IFieldWrapper wrapper : fields) {
             if (wrapper.getField() != null && wrapper.getField().equals(field))
-                return wrapper;
+                return wrapper.getValidator().getId();
         }
 
-        return null;
+        return -1;
     }
 
 

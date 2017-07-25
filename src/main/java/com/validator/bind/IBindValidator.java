@@ -18,5 +18,5 @@ public interface IBindValidator {
 
     IFieldWrapper getFieldWrapper(int fieldId);
 
-    IFieldWrapper getFieldWrapper(String field);
+    int getWidgetId(String field);
 }
