@@ -52,7 +52,7 @@ public class ValidatorProcessor extends AbstractProcessor {
                 params.put("type", antn.type());
                 if (!antn.related().isEmpty())
                     params.put("related", antn.related());
-                if (!antn.errorMessage().isEmpty())
+                if (antn.errorMessage() > 0)
                     params.put("errorMessage", antn.errorMessage());
                 if (!antn.field().isEmpty())
                     params.put("field", antn.field());

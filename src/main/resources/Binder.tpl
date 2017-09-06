@@ -22,9 +22,9 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
         fields.add(new FieldWrapper(new ${field.type}(view.${field.name}.getId()#if($field.pattern),"$field.pattern"#end)#if($field.errorMessage){
             {
                     #if (${field.type.equals("PasswordValidator")})
-                    defaultErrorMessage = "$field.errorMessage";
+                    defaultErrorMessage = view.getString($field.errorMessage);
                     #else
-                    errorMessage = "$field.errorMessage";
+                    errorMessage = view.getString($field.errorMessage);
                     #end
             }
             }#end) {

@@ -14,9 +14,7 @@ public @interface BindViewValidator {
 
     String type() default ValidatorType.REQUIRED;
 
-    boolean hasLayout() default false;
-
-    String errorMessage() default "";
+    int errorMessage() default 0;
 
     String related() default "";
 
