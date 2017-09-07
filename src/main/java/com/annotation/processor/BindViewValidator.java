@@ -14,11 +14,11 @@ public @interface BindViewValidator {
 
     String type() default ValidatorType.REQUIRED;
 
-    boolean hasLayout() default false;
-
     String errorMessage() default "";
 
     String related() default "";
 
     String pattern() default "";
+
+    int view();
 }

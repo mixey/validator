@@ -17,6 +17,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes("com.annotation.processor.BindViewValidator")
@@ -48,7 +49,8 @@ public class ValidatorProcessor extends AbstractProcessor {
                 if (!className.equals(targetClassName)) continue;
 
                 HashMap<String, Object> params = new HashMap<>();
-                params.put("name", element.getSimpleName().toString());
+                params.put("className", ((DeclaredType) element.asType()).asElement());
+                params.put("viewResId", antn.view());
                 params.put("type", antn.type());
                 if (!antn.related().isEmpty())
                     params.put("related", antn.related());

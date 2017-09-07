@@ -19,7 +19,7 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
         view = (T) target;
         #foreach($field in $fields)
 
-        fields.add(new FieldWrapper(new ${field.type}(view.${field.name}.getId()#if($field.pattern),"$field.pattern"#end)#if($field.errorMessage){
+        fields.add(new FieldWrapper(new ${field.type}(view.getView().findViewById(${field.viewResId}).getId()#if($field.pattern),"$field.pattern"#end)#if($field.errorMessage){
             {
                     #if (${field.type.equals("PasswordValidator")})
                     defaultErrorMessage = "$field.errorMessage";
@@ -28,7 +28,8 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
                     #end
             }
             }#end) {
-            private final TextInputLayout layout = searchLayout(view.${field.name}, 3);
+            private final $field.className fieldView = ($field.className) view.getView().findViewById(${field.viewResId});
+            private final TextInputLayout layout = searchLayout(fieldView, 3);
 
             @Override
             public Object getValue() {
@@ -36,13 +37,13 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
                     return plugin.getValue();
                 #if (${field.type.equals("PasswordValidator")})
 
-                return new String[]{view.${field.name}.getText().toString()#if (${field.related}),view.${field.related}.getText().toString()#end};
+                return new String[]{fieldView.getText().toString()#if (${field.related}),view.${field.related}.getText().toString()#end};
                 #elseif (${field.type.equals("CheckValidator")})
 
-                return view.${field.name}.isChecked();
+                return fieldView.isChecked();
                 #else
 
-                return view.${field.name}.getText().toString();
+                return fieldView.getText().toString();
                 #end
 
             }
@@ -53,7 +54,7 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
                     return;
 
                 if (layout == null)
-                    view.${field.name}.setError(message);
+                    fieldView.setError(message);
                 else
                     layout.setError(message);
             }
@@ -61,7 +62,7 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
             @Override
             public boolean isActiveValidator() {
                 return (layout != null && layout.getVisibility() == 0)
-                        && view.${field.name}.getVisibility() == 0
+                        && fieldView.getVisibility() == 0
                         && !inactiveFieldIds.contains(getValidator().getId());
 
             }
