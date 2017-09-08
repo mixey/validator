@@ -19,7 +19,7 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
         view = (T) target;
         #foreach($field in $fields)
 
-        fields.add(new FieldWrapper(new ${field.type}(view.getView().findViewById(${field.viewResId}).getId()#if($field.pattern),"$field.pattern"#end)#if($field.errorMessage){
+        fields.add(new FieldWrapper(new ${field.type}(view.getView().findViewById(${field.view}).getId()#if($field.pattern),"$field.pattern"#end)#if($field.errorMessage){
             {
                     #if (${field.type.equals("PasswordValidator")})
                     defaultErrorMessage = "$field.errorMessage";
@@ -28,7 +28,7 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
                     #end
             }
             }#end) {
-            private final $field.className fieldView = ($field.className) view.getView().findViewById(${field.viewResId});
+            private final $field.className fieldView = ($field.className) view.getView().findViewById(${field.view});
             private final TextInputLayout layout = searchLayout(fieldView, 3);
 
             @Override
@@ -37,7 +37,7 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
                     return plugin.getValue();
                 #if (${field.type.equals("PasswordValidator")})
 
-                return new String[]{fieldView.getText().toString()#if (${field.related}),view.${field.related}.getText().toString()#end};
+                return new String[]{fieldView.getText().toString()#if (${field.related}),(($field.className) view.getView().findViewById(${field.related})).getText().toString()#end};
                 #elseif (${field.type.equals("CheckValidator")})
 
                 return fieldView.isChecked();

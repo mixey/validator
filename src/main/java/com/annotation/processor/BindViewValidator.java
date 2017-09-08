@@ -16,7 +16,7 @@ public @interface BindViewValidator {
 
     String errorMessage() default "";
 
-    String related() default "";
+    int related() default 0;
 
     String pattern() default "";
 
