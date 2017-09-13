@@ -20,19 +20,22 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.tools.JavaFileObject;
 
-@SupportedAnnotationTypes("com.annotation.processor.BindViewValidator")
+@SupportedAnnotationTypes("com.annotation.processor.Validator")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class ValidatorProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnv) {
+
+
         ArrayList<String> classList = new ArrayList<>();
-        for (Element element : roundEnv.getElementsAnnotatedWith(BindViewValidator.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(Validator.class)) {
             String fullClassName = element.getEnclosingElement().asType().toString();
             if (!classList.contains(fullClassName))
                 classList.add(fullClassName);
         }
 
         for (String className : classList) {
+
             String parentClassName = className.substring(className.lastIndexOf('.') + 1, className.length());
             String packageName = className.substring(0, className.lastIndexOf('.'));
 
@@ -42,26 +45,28 @@ public class ValidatorProcessor extends AbstractProcessor {
 
             ArrayList<HashMap> fields = new ArrayList<>();
 
-            for (Element element : roundEnv.getElementsAnnotatedWith(BindViewValidator.class)) {
-                BindViewValidator antn = element.getAnnotation(BindViewValidator.class);
+            for (Element element : roundEnv.getElementsAnnotatedWith(Validator.class)) {
+                Validator antn = element.getAnnotation(Validator.class);
                 String targetClassName = element.getEnclosingElement().asType().toString();
 
                 if (!className.equals(targetClassName)) continue;
 
-                HashMap<String, Object> params = new HashMap<>();
-                params.put("className", ((DeclaredType) element.asType()).asElement());
-                params.put("view", antn.view());
-                params.put("type", antn.type());
-                if (antn.related() > 0)
-                    params.put("related", antn.related());
-                if (!antn.errorMessage().isEmpty())
-                    params.put("errorMessage", antn.errorMessage());
-                if (!antn.field().isEmpty())
-                    params.put("field", antn.field());
-                if (!antn.pattern().isEmpty())
-                    params.put("pattern", antn.pattern().replace("\\", "\\\\"));
+                for (Rule rule : antn.rules()) {
+                    HashMap<String, Object> params = new HashMap<>();
+                    params.put("className", "android.widget.TextView");
+                    params.put("view", rule.view());
+                    params.put("type", rule.type());
+                    if (rule.related() > 0)
+                        params.put("related", rule.related());
+                    if (rule.errorMessage() > 0)
+                        params.put("errorMessage", rule.errorMessage());
+                    if (!rule.field().isEmpty())
+                        params.put("field", rule.field());
+                    if (!rule.pattern().isEmpty())
+                        params.put("pattern", rule.pattern().replace("\\", "\\\\"));
 
-                fields.add(params);
+                    fields.add(params);
+                }
             }
 
             context.put("fields", fields);
@@ -83,8 +88,8 @@ public class ValidatorProcessor extends AbstractProcessor {
                 vt.merge(context, writer);
                 writer.close();
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
 

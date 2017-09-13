@@ -31,18 +31,18 @@ class AnyView {
 @BindView(R.id.text_field)
 EditText textView;
 
-private IBindValidator bindValidator;
+private IBindValidator validator;
 
  @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        bindValidator = BindValidator.bind(this);
+        validator = BindValidator.bind(this);
 
         // example validator usage 
-        ValidatorGroup v = bindValidator.getValidator(); 
+        ValidatorGroup v = validator.getValidator();
         if (!v.validate()) {
-            bindValidator.setError(v.getErrors());            
+            validator.setError(v.getErrors());
         }
     }
 }
@@ -68,7 +68,7 @@ EditText phoneView;
 ```
 ## How to add a custom view into Validator
 1) You need implement IFieldExtension in your custom view 
-2) Add your custom view manualy **bindValidator.add(<your_custom_view>);**
+2) Add your custom view manualy **validator.add(<your_custom_view>);**
 
 ## How to add in project 
 ```
