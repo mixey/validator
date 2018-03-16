@@ -52,10 +52,12 @@ public final class ${parentClassName}_BindValidator<T extends ${parentClassName}
                 if (plugin != null && plugin.setError(message))
                     return;
 
-                if (layout == null)
+                if (layout == null){
                     fieldView.setError(message);
-                else
+                } else{
                     layout.setError(message);
+                    layout.setErrorEnabled(message != null);
+                }
             }
 
             @Override

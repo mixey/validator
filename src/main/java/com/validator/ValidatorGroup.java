@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ValidatorGroup {
     private ArrayList<IValidator> validators = new ArrayList<>();
-    private Map<String, String> errors;
+    private Map<String, String> errors = new HashMap<>();
 
     public void add(IValidator validator) {
         validators.add(validator);
@@ -15,7 +15,7 @@ public class ValidatorGroup {
 
     public boolean validate() {
         boolean result = true;
-        errors = new HashMap<>();
+        errors.clear();
         for (IValidator v : validators) {
             if (!v.validate()) {
                 errors.put(String.valueOf(v.getId()), v.getErrorMessage());
